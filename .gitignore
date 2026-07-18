@@ -42,6 +42,9 @@ Thumbs.db
 *.whl
 *.tar.gz
 
+# Backend core — belongs in Quantum_software_infrastructure (private repo)
+app/
+
 # Infrastructure — belongs in Quantum_software_infrastructure (private repo)
 docker-compose.prod.yml
 nginx/
