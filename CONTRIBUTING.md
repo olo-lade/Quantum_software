@@ -1,4 +1,4 @@
-# Contributing to Universal Quantum API
+# Contributing to Quantum Software (QaaS) by Joshua Tosin Pamilerin
 
 Thank you for your interest in contributing! This document outlines the process for reporting bugs, suggesting features, and submitting code changes.
 
@@ -34,7 +34,7 @@ Before opening an issue, search existing issues to avoid duplicates. When filing
 
 ## Suggesting Features
 
-Open a GitHub Issue with the label `enhancement`. Describe:
+Open a GitHub Issue with the label `enhancement` on https://github.com/olo-lade/Quantum_software. Describe:
 
 - The problem you're solving
 - Your proposed solution
@@ -45,8 +45,8 @@ Open a GitHub Issue with the label `enhancement`. Describe:
 ## Development Setup
 
 ```bash
-git clone https://github.com/your-org/universal-quantum-api.git
-cd universal-quantum-api
+git clone https://github.com/olo-lade/Quantum_software.git
+cd Quantum_software
 python -m venv venv
 venv\Scripts\activate        # Windows
 source venv/bin/activate     # Mac/Linux
@@ -75,7 +75,10 @@ cp .env.example .env
    git commit -m "feat: add healthcare molecular simulation endpoint"
    ```
 
-5. Push and open a Pull Request against `main`. Fill in the PR template.
+5. Push and open a Pull Request against `main` on https://github.com/olo-lade/Quantum_software.
+
+> ⚠️ **Attribution Required:** All contributions and derivative works must credit the original author:
+> **Joshua Tosin Pamilerin** — https://github.com/olo-lade/Quantum_software
 
 ---
 

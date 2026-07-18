@@ -1,3 +1,7 @@
+# Original Author: Joshua Tosin Pamilerin (GitHub: olo-lade)
+# Repository: https://github.com/olo-lade/Quantum_software
+# License: CC BY 4.0 — Credit required for any use or derivative work.
+
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 import math

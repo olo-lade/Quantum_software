@@ -1,5 +1,11 @@
 # 🌌 Quantum Software (QaaS Layer)
 
+> **Original Author:** Joshua Tosin Pamilerin (GitHub: [olo-lade](https://github.com/olo-lade))
+> **Repository:** https://github.com/olo-lade/Quantum_software
+> **License:** [CC BY 4.0](LICENSE) — You must credit the original author in any use, fork, or derivative work.
+
+---
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://python.org)
 [![Framework](https://img.shields.io/badge/Framework-FastAPI-009688.svg)](https://fastapi.tiangolo.com)
