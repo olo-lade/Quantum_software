@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finance — Quantum API</title>
+  <link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="index.html">🌌 Quantum API</a>
+    <div class="nav-links">
+      <a href="crypto.html">Cryptography</a>
+      <a href="keys.html">Key Management</a>
+      <a href="monitor.html">Monitoring</a>
+      <a href="logistics.html">Logistics</a>
+      <a href="finance.html">Finance</a>
+      <input class="key-input" type="text" placeholder="X-Api-Key…" />
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <div class="page-header">
+      <span class="tag tag-finance">📈 Finance</span>
+      <h1>Quantum Portfolio Optimization</h1>
+      <p>Balance expected returns against risk using a VQE-inspired quantum ansatz. Select the optimal subset of assets for any risk tolerance — from conservative to aggressive.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>What is VQE?</strong> The Variational Quantum Eigensolver uses a parameterized quantum circuit (ansatz) to find the minimum energy state of a problem Hamiltonian. Applied to finance, it finds the asset allocation that minimizes risk-adjusted cost — equivalent to solving the Markowitz portfolio optimization problem.
+    </div>
+
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-title">Portfolio Optimization</div>
+        <div class="card-desc">
+          Provide expected returns per asset, an NxN covariance (risk) matrix, and a risk tolerance between 0.0 (most conservative) and 1.0 (most aggressive). The API returns the optimal allocation and selected assets.
+        </div>
+        <div class="endpoint-badge">POST /quantum/finance/portfolio</div>
+        <label>Expected Returns — one value per asset (JSON array)</label>
+        <input id="returns" type="text" value="[0.12, 0.08, 0.15, 0.05]" />
+        <label>Risk Matrix — NxN covariance matrix (JSON array of arrays)</label>
+        <textarea id="riskMatrix" rows="6">[[0.1, 0.02, 0.04, 0.01],
+[0.02, 0.08, 0.03, 0.02],
+[0.04, 0.03, 0.12, 0.01],
+[0.01, 0.02, 0.01, 0.05]]</textarea>
+        <label>Risk Tolerance (0.0 = low risk → 1.0 = high risk)</label>
+        <input id="riskTolerance" type="number" value="0.5" min="0" max="1" step="0.1" />
+        <button class="btn" onclick="portfolio(event)">Optimize Portfolio</button>
+        <div class="result" id="financeResult">—</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">How to read the response</div>
+        <div class="card-desc">
+          The response contains two fields:
+          <br/><br/>
+          <code style="color:var(--green)">allocation</code> — a map of each asset to its weight in the portfolio. A weight of <code style="color:var(--green)">0.5</code> means 50% of the portfolio, <code style="color:var(--green)">0.0</code> means the asset was excluded.
+          <br/><br/>
+          <code style="color:var(--green)">selected_assets</code> — the list of assets that were included in the optimal portfolio.
+          <br/><br/>
+          <strong>Example response:</strong>
+        </div>
+        <div class="result" style="min-height:auto">{
+  "allocation": {
+    "asset_0": 0.5,
+    "asset_1": 0.0,
+    "asset_2": 0.5,
+    "asset_3": 0.0
+  },
+  "selected_assets": ["asset_0", "asset_2"]
+}</div>
+        <div class="card-desc" style="margin-top:1rem;">
+          <strong>Use cases:</strong> robo-advisors, hedge fund allocation, pension fund rebalancing, crypto portfolio management.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    Built by <a href="https://github.com/olo-lade" target="_blank">Oluwatosin Olalere</a> ·
+    <a href="http://127.0.0.1:8000/docs" target="_blank">Swagger UI</a>
+  </footer>
+
+  <script src="shared.js"></script>
+  <script>
+    function portfolio(e) {
+      try {
+        call('/quantum/finance/portfolio', {
+          returns: JSON.parse(document.getElementById('returns').value),
+          risk_matrix: JSON.parse(document.getElementById('riskMatrix').value),
+          risk_tolerance: parseFloat(document.getElementById('riskTolerance').value),
+        }, 'financeResult', e.target);
+      } catch {
+        show('financeResult', { error: 'Invalid JSON input.' }, true);
+      }
+    }
+  </script>
+</body>
+</html>

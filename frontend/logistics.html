@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Logistics — Quantum API</title>
+  <link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="index.html">🌌 Quantum API</a>
+    <div class="nav-links">
+      <a href="crypto.html">Cryptography</a>
+      <a href="keys.html">Key Management</a>
+      <a href="monitor.html">Monitoring</a>
+      <a href="logistics.html">Logistics</a>
+      <a href="finance.html">Finance</a>
+      <input class="key-input" type="text" placeholder="X-Api-Key…" />
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <div class="page-header">
+      <span class="tag tag-logistics">🚚 Logistics</span>
+      <h1>Quantum Route Optimization</h1>
+      <p>Solve multi-city routing problems using a QAOA-inspired quantum circuit. Feed in a distance matrix and get the shortest route back — no classical solver required.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>What is QAOA?</strong> The Quantum Approximate Optimization Algorithm encodes the routing problem as a cost Hamiltonian and uses quantum interference to find low-cost solutions. It's particularly powerful for combinatorial problems like the Travelling Salesman Problem that are computationally expensive classically.
+    </div>
+
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-title">Route Optimization</div>
+        <div class="card-desc">
+          Provide a square NxN distance matrix where <code style="color:var(--green)">distances[i][j]</code> is the distance from city i to city j. The diagonal must be 0. The API returns the optimal visit order and total distance.
+          <br/><br/>
+          The default example below has 4 cities. You can expand it to any size.
+        </div>
+        <div class="endpoint-badge">POST /quantum/logistics/optimize</div>
+        <label>Distance Matrix (JSON array of arrays)</label>
+        <textarea id="distances" rows="7">[[0, 10, 15, 20],
+[10, 0, 35, 25],
+[15, 35, 0, 30],
+[20, 25, 30, 0]]</textarea>
+        <button class="btn" onclick="optimize(event)">Optimize Route</button>
+        <div class="result" id="logisticsResult">—</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">How to read the response</div>
+        <div class="card-desc">
+          The response contains two fields:
+          <br/><br/>
+          <code style="color:var(--green)">route</code> — an ordered list of city indices representing the optimal visit sequence. For example <code style="color:var(--green)">[0, 1, 3, 2]</code> means: start at city 0, go to city 1, then city 3, then city 2.
+          <br/><br/>
+          <code style="color:var(--green)">total_distance</code> — the sum of distances along the optimal route.
+          <br/><br/>
+          <strong>Example response:</strong>
+        </div>
+        <div class="result" style="min-height:auto">{
+  "route": [0, 1, 3, 2],
+  "total_distance": 80.0
+}</div>
+        <div class="card-desc" style="margin-top:1rem;">
+          <strong>Use cases:</strong> delivery fleet routing, warehouse pick paths, network packet routing, supply chain optimization.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    Built by <a href="https://github.com/olo-lade" target="_blank">Oluwatosin Olalere</a> ·
+    <a href="http://127.0.0.1:8000/docs" target="_blank">Swagger UI</a>
+  </footer>
+
+  <script src="shared.js"></script>
+  <script>
+    function optimize(e) {
+      try {
+        const distances = JSON.parse(document.getElementById('distances').value);
+        call('/quantum/logistics/optimize', { distances }, 'logisticsResult', e.target);
+      } catch {
+        show('logisticsResult', { error: 'Invalid JSON in distance matrix.' }, true);
+      }
+    }
+  </script>
+</body>
+</html>

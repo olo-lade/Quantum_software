@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Key Management — Quantum API</title>
+  <link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="index.html">🌌 Quantum API</a>
+    <div class="nav-links">
+      <a href="crypto.html">Cryptography</a>
+      <a href="keys.html">Key Management</a>
+      <a href="monitor.html">Monitoring</a>
+      <a href="logistics.html">Logistics</a>
+      <a href="finance.html">Finance</a>
+      <input class="key-input" type="text" placeholder="X-Api-Key…" />
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <div class="page-header">
+      <span class="tag tag-keys">🗝️ Key Management</span>
+      <h1>Managed Key Lifecycle</h1>
+      <p>Issue quantum-random keys to your apps, rotate them on a schedule, revoke compromised keys instantly, and verify them with automatic threat detection — all with a full audit trail.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>How it works:</strong> Issue a key for your app ID → use <code style="color:var(--green);font-size:0.8rem">key_id</code> + <code style="color:var(--green);font-size:0.8rem">key_value</code> to authenticate requests → verify calls automatically detect replay attacks, brute force, and revoked key misuse → rotate or revoke at any time.
+    </div>
+
+    <div class="grid">
+
+      <!-- ISSUE -->
+      <div class="card">
+        <div class="card-title">Issue Key</div>
+        <div class="card-desc">Generate and store a quantum-random key for a client app. Optionally set a TTL — the key automatically expires after the given number of hours.</div>
+        <div class="endpoint-badge">POST /quantum/keys/issue</div>
+        <label>App ID — your app's unique identifier</label>
+        <input id="issueAppId" type="text" placeholder="e.g. my-web-app" />
+        <label>Key Bits (128 – 512)</label>
+        <input id="issueKeyBits" type="number" value="256" min="128" max="512" step="128" />
+        <label>TTL Hours — optional (leave blank = no expiry)</label>
+        <input id="issueTtl" type="number" placeholder="e.g. 24" min="1" />
+        <button class="btn" onclick="keysIssue(event)">Issue Key</button>
+        <div class="result" id="issueResult">—</div>
+        <p style="font-size:0.75rem;color:var(--muted);margin-top:0.5rem;">Copy the <code style="color:var(--green)">key_id</code> — you'll need it for rotate, revoke, and verify.</p>
+      </div>
+
+      <!-- ROTATE -->
+      <div class="card">
+        <div class="card-title">Rotate Key</div>
+        <div class="card-desc">Replace a live key with a fresh quantum-random one. The previous key value is preserved in the response for a graceful transition period — your app can switch over without downtime.</div>
+        <div class="endpoint-badge">POST /quantum/keys/{key_id}/rotate</div>
+        <label>Key ID</label>
+        <input id="rotateKeyId" type="text" placeholder="Paste key_id from issue response…" />
+        <button class="btn" onclick="keysRotate(event)">Rotate Key</button>
+        <div class="result" id="rotateResult">—</div>
+      </div>
+
+      <!-- REVOKE -->
+      <div class="card">
+        <div class="card-title">Revoke Key</div>
+        <div class="card-desc">Permanently revoke a key. Any future verification attempt using a revoked key is automatically flagged as a <strong style="color:var(--red)">high severity</strong> threat event and written to the audit log.</div>
+        <div class="endpoint-badge">DELETE /quantum/keys/{key_id}/revoke</div>
+        <label>Key ID</label>
+        <input id="revokeKeyId" type="text" placeholder="Paste key_id to revoke…" />
+        <button class="btn btn-danger" onclick="keysRevoke(event)">Revoke Key</button>
+        <div class="result" id="revokeResult">—</div>
+      </div>
+
+      <!-- VERIFY -->
+      <div class="card">
+        <div class="card-title">Verify Key</div>
+        <div class="card-desc">Verify a managed key and automatically detect threats. Returns <code style="color:var(--green)">valid: true/false</code> plus a reason. Triggers alerts for: replay attacks, brute force (5+ failures in 60s), revoked key use, and expired keys.</div>
+        <div class="endpoint-badge">POST /quantum/keys/verify</div>
+        <label>Key ID</label>
+        <input id="verifyKeyId" type="text" placeholder="Paste key_id…" />
+        <label>Key Value</label>
+        <input id="verifyKeyValue" type="text" placeholder="Paste key_value…" />
+        <button class="btn" onclick="keysVerify(event)">Verify Key</button>
+        <div class="result" id="verifyResult">—</div>
+      </div>
+
+    </div>
+
+    <hr class="divider" />
+
+    <div class="info-box">
+      <strong>Threat detection summary:</strong><br/>
+      🔴 <strong>brute_force</strong> — 5+ failed verifications within 60 seconds from the same source<br/>
+      🟠 <strong>replay</strong> — the same key value is submitted more than once<br/>
+      🟠 <strong>revoked_key_use</strong> — any attempt to use a key that has been revoked<br/><br/>
+      All threats are written to the audit log and appear in <a href="monitor.html" style="color:#a78bfa">Monitoring → Alerts</a>.
+    </div>
+
+  </div>
+
+  <footer>
+    Built by <a href="https://github.com/olo-lade" target="_blank">Oluwatosin Olalere</a> ·
+    <a href="http://127.0.0.1:8000/docs" target="_blank">Swagger UI</a>
+  </footer>
+
+  <script src="shared.js"></script>
+  <script>
+    function keysIssue(e) {
+      const ttl = document.getElementById('issueTtl').value;
+      const appId = document.getElementById('issueAppId').value.trim();
+      if (!appId) { show('issueResult', { error: 'App ID is required.' }, true); return; }
+      call('/quantum/keys/issue', {
+        app_id: appId,
+        key_bits: +document.getElementById('issueKeyBits').value,
+        ...(ttl ? { ttl_hours: +ttl } : {}),
+      }, 'issueResult', e.target);
+    }
+    function keysRotate(e) {
+      const id = document.getElementById('rotateKeyId').value.trim();
+      if (!id) { show('rotateResult', { error: 'Key ID is required.' }, true); return; }
+      call(`/quantum/keys/${id}/rotate`, {}, 'rotateResult', e.target);
+    }
+    function keysRevoke(e) {
+      const id = document.getElementById('revokeKeyId').value.trim();
+      if (!id) { show('revokeResult', { error: 'Key ID is required.' }, true); return; }
+      if (!confirm('Permanently revoke this key? This cannot be undone.')) return;
+      call(`/quantum/keys/${id}/revoke`, {}, 'revokeResult', e.target, 'DELETE');
+    }
+    function keysVerify(e) {
+      call('/quantum/keys/verify', {
+        key_id: document.getElementById('verifyKeyId').value.trim(),
+        key_value: document.getElementById('verifyKeyValue').value.trim(),
+      }, 'verifyResult', e.target);
+    }
+  </script>
+</body>
+</html>

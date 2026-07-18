@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Monitoring — Quantum API</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .severity-critical { color: #f87171; font-weight: 700; }
+    .severity-high     { color: #fb923c; font-weight: 700; }
+    .severity-medium   { color: #facc15; font-weight: 700; }
+    .severity-low      { color: #4ade80; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="index.html">🌌 Quantum API</a>
+    <div class="nav-links">
+      <a href="crypto.html">Cryptography</a>
+      <a href="keys.html">Key Management</a>
+      <a href="monitor.html">Monitoring</a>
+      <a href="logistics.html">Logistics</a>
+      <a href="finance.html">Finance</a>
+      <input class="key-input" type="text" placeholder="X-Api-Key…" />
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <div class="page-header">
+      <span class="tag tag-monitor">🚨 Monitoring</span>
+      <h1>Audit & Threat Monitoring</h1>
+      <p>Every security event across your apps is logged automatically. Query the tamper-evident audit trail, view active threat alerts, and mark incidents as resolved after investigation.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>What gets logged automatically:</strong> key issued · key rotated · key revoked · auth success · auth failure · replay detected · brute force detected · revoked key use.<br/>
+      Every event includes a timestamp, app ID, and the client IP address where available.
+    </div>
+
+    <div class="grid">
+
+      <!-- AUDIT LOG -->
+      <div class="card">
+        <div class="card-title">Audit Log</div>
+        <div class="card-desc">Query the tamper-evident log of all security events for your account. Filter by app ID to see events for a specific platform. Events are returned newest-first.</div>
+        <div class="endpoint-badge">POST /quantum/audit/query</div>
+        <label>App ID — optional filter</label>
+        <input id="auditAppId" type="text" placeholder="Filter by app_id or leave blank for all…" />
+        <label>Limit (1 – 200)</label>
+        <input id="auditLimit" type="number" value="50" min="1" max="200" />
+        <button class="btn" onclick="auditQuery(event)">Query Audit Log</button>
+        <div class="result" id="auditResult">—</div>
+      </div>
+
+      <!-- THREAT ALERTS -->
+      <div class="card">
+        <div class="card-title">Threat Alerts</div>
+        <div class="card-desc">
+          Get active threat alerts for your apps. Three threat types are detected automatically:
+          <br/><br/>
+          <span class="severity-critical">● brute_force</span> — 5+ failed verifications in 60s<br/>
+          <span class="severity-high">● replay</span> — same key value used more than once<br/>
+          <span class="severity-high">● revoked_key_use</span> — attempt to use a revoked key
+        </div>
+        <div class="endpoint-badge">POST /quantum/monitor/alerts</div>
+        <label>App ID — optional filter</label>
+        <input id="alertsAppId" type="text" placeholder="Filter by app_id or leave blank for all…" />
+        <label>Show</label>
+        <select id="alertsUnresolved">
+          <option value="true">Unresolved alerts only</option>
+          <option value="false">All alerts (including resolved)</option>
+        </select>
+        <button class="btn" onclick="monitorAlerts(event)">Get Alerts</button>
+        <div class="result" id="alertsResult">—</div>
+      </div>
+
+      <!-- RESOLVE -->
+      <div class="card">
+        <div class="card-title">Resolve Threat</div>
+        <div class="card-desc">Mark a threat event as resolved after you have investigated and addressed it. Resolved threats are excluded from the default alerts view but remain in the audit log permanently.</div>
+        <div class="endpoint-badge">POST /quantum/monitor/resolve/{threat_id}</div>
+        <label>Threat ID — from the alerts response</label>
+        <input id="resolveThreatId" type="text" placeholder="Paste threat id…" />
+        <button class="btn" onclick="monitorResolve(event)">Mark as Resolved</button>
+        <div class="result" id="resolveResult">—</div>
+      </div>
+
+    </div>
+
+    <hr class="divider" />
+
+    <div class="info-box">
+      <strong>Severity levels:</strong><br/>
+      🔴 <strong>critical</strong> — brute force attack detected (immediate action required)<br/>
+      🟠 <strong>high</strong> — replay attack or revoked key misuse<br/>
+      🟡 <strong>medium</strong> — unusual access patterns<br/>
+      🟢 <strong>low</strong> — informational anomalies
+    </div>
+
+  </div>
+
+  <footer>
+    Built by <a href="https://github.com/olo-lade" target="_blank">Oluwatosin Olalere</a> ·
+    <a href="http://127.0.0.1:8000/docs" target="_blank">Swagger UI</a>
+  </footer>
+
+  <script src="shared.js"></script>
+  <script>
+    function auditQuery(e) {
+      const app = document.getElementById('auditAppId').value.trim();
+      call('/quantum/audit/query', {
+        limit: +document.getElementById('auditLimit').value,
+        ...(app ? { app_id: app } : {}),
+      }, 'auditResult', e.target);
+    }
+    function monitorAlerts(e) {
+      const app = document.getElementById('alertsAppId').value.trim();
+      call('/quantum/monitor/alerts', {
+        unresolved_only: document.getElementById('alertsUnresolved').value === 'true',
+        ...(app ? { app_id: app } : {}),
+      }, 'alertsResult', e.target);
+    }
+    function monitorResolve(e) {
+      const id = document.getElementById('resolveThreatId').value.trim();
+      if (!id) { show('resolveResult', { error: 'Threat ID is required.' }, true); return; }
+      call(`/quantum/monitor/resolve/${id}`, {}, 'resolveResult', e.target);
+    }
+  </script>
+</body>
+</html>

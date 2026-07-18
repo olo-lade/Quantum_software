@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cryptography — Quantum API</title>
+  <link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="index.html">🌌 Quantum API</a>
+    <div class="nav-links">
+      <a href="crypto.html">Cryptography</a>
+      <a href="keys.html">Key Management</a>
+      <a href="monitor.html">Monitoring</a>
+      <a href="logistics.html">Logistics</a>
+      <a href="finance.html">Finance</a>
+      <input class="key-input" type="text" placeholder="X-Api-Key…" />
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <div class="page-header">
+      <span class="tag tag-crypto">🔐 Cryptography</span>
+      <h1>Quantum Cryptography</h1>
+      <p>True quantum randomness for key generation, unbreakable One-Time Pad encryption, randomness quality auditing, and BB84 quantum key distribution — all via simple REST calls.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>Why quantum randomness?</strong> Classical computers generate pseudo-random numbers using algorithms — predictable if you know the seed. Quantum circuits use physical superposition, making the output fundamentally unpredictable and impossible to reproduce.
+    </div>
+
+    <div class="grid">
+
+      <!-- KEYGEN -->
+      <div class="card">
+        <div class="card-title">Key Generation</div>
+        <div class="card-desc">Generate a cryptographic key using Hadamard superposition. Each qubit is placed in a perfect 50/50 state before measurement — true quantum randomness.</div>
+        <div class="endpoint-badge">POST /quantum/crypto/keygen</div>
+        <label>Number of Bits (8 – 512)</label>
+        <input id="numBits" type="number" value="256" min="8" max="512" step="8" />
+        <button class="btn" onclick="keygen(event)">Generate Key</button>
+        <div class="result" id="keygenResult">—</div>
+      </div>
+
+      <!-- ENTROPY -->
+      <div class="card">
+        <div class="card-title">Entropy Scoring</div>
+        <div class="card-desc">Audit the randomness quality of the quantum backend. Runs the circuit multiple times and calculates Shannon entropy on the outcome distribution. Score of 1.0 = perfect randomness.</div>
+        <div class="endpoint-badge">POST /quantum/crypto/entropy</div>
+        <label>Number of Bits (8 – 128)</label>
+        <input id="entropyBits" type="number" value="64" min="8" max="128" step="8" />
+        <label>Shots — circuit executions (64 – 4096)</label>
+        <input id="entropyShots" type="number" value="1024" min="64" max="4096" step="64" />
+        <button class="btn" onclick="entropy(event)">Score Entropy</button>
+        <div class="result" id="entropyResult">—</div>
+      </div>
+
+      <!-- OTP ENCRYPT -->
+      <div class="card">
+        <div class="card-title">OTP Encrypt</div>
+        <div class="card-desc">Encrypt a message using a quantum-random One-Time Pad. A quantum key the exact length of your message is generated and XOR'd byte-by-byte. Mathematically unbreakable when the key is truly random.</div>
+        <div class="endpoint-badge">POST /quantum/crypto/otp/encrypt</div>
+        <label>Plaintext Message</label>
+        <input id="otpPlaintext" type="text" placeholder="Enter message to encrypt…" />
+        <button class="btn" onclick="otpEncrypt(event)">Encrypt</button>
+        <div class="result" id="otpEncryptResult">—</div>
+        <p style="font-size:0.75rem;color:var(--muted);margin-top:0.5rem;">⚠️ Copy the <code style="color:var(--green)">key</code> from the response — it is never stored server-side.</p>
+      </div>
+
+      <!-- OTP DECRYPT -->
+      <div class="card">
+        <div class="card-title">OTP Decrypt</div>
+        <div class="card-desc">Decrypt a quantum OTP ciphertext using the original key returned during encryption. XOR reversal is applied byte-by-byte to recover the original plaintext.</div>
+        <div class="endpoint-badge">POST /quantum/crypto/otp/decrypt</div>
+        <label>Ciphertext (base64)</label>
+        <input id="otpCiphertext" type="text" placeholder="Paste ciphertext from encrypt response…" />
+        <label>Key (base64)</label>
+        <input id="otpKey" type="text" placeholder="Paste key from encrypt response…" />
+        <button class="btn" onclick="otpDecrypt(event)">Decrypt</button>
+        <div class="result" id="otpDecryptResult">—</div>
+      </div>
+
+      <!-- BB84 -->
+      <div class="card">
+        <div class="card-title">BB84 Key Distribution</div>
+        <div class="card-desc">Simulate the BB84 Quantum Key Distribution protocol. Alice and Bob exchange qubits using random bases. Matching bases produce a shared secret key. Any eavesdropper disturbs the quantum state — detectable via error rate above 10%.</div>
+        <div class="endpoint-badge">POST /quantum/crypto/bb84</div>
+        <label>Number of Bits (8 – 64)</label>
+        <input id="bb84Bits" type="number" value="16" min="8" max="64" step="8" />
+        <button class="btn" onclick="bb84(event)">Simulate BB84</button>
+        <div class="result" id="bb84Result">—</div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    Built by <a href="https://github.com/olo-lade" target="_blank">Oluwatosin Olalere</a> ·
+    <a href="http://127.0.0.1:8000/docs" target="_blank">Swagger UI</a>
+  </footer>
+
+  <script src="shared.js"></script>
+  <script>
+    function keygen(e) {
+      call('/quantum/crypto/keygen', { num_bits: +document.getElementById('numBits').value }, 'keygenResult', e.target);
+    }
+    function entropy(e) {
+      call('/quantum/crypto/entropy', {
+        num_bits: +document.getElementById('entropyBits').value,
+        shots: +document.getElementById('entropyShots').value,
+      }, 'entropyResult', e.target);
+    }
+    function otpEncrypt(e) {
+      const pt = document.getElementById('otpPlaintext').value.trim();
+      if (!pt) { show('otpEncryptResult', { error: 'Plaintext is required.' }, true); return; }
+      call('/quantum/crypto/otp/encrypt', { plaintext: pt }, 'otpEncryptResult', e.target);
+    }
+    function otpDecrypt(e) {
+      call('/quantum/crypto/otp/decrypt', {
+        ciphertext: document.getElementById('otpCiphertext').value.trim(),
+        key: document.getElementById('otpKey').value.trim(),
+      }, 'otpDecryptResult', e.target);
+    }
+    function bb84(e) {
+      call('/quantum/crypto/bb84', { num_bits: +document.getElementById('bb84Bits').value }, 'bb84Result', e.target);
+    }
+  </script>
+</body>
+</html>
