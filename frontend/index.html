@@ -178,15 +178,149 @@
       font-size: 0.78rem;
       color: var(--muted);
     }
-    .register-hint code {
+    /* ── ARCHITECTURE DIAGRAM ── */
+    .arch-section { max-width: 900px; margin: 0 auto; padding: 3.5rem 1.5rem; }
+    .arch-section > h2 { text-align: center; font-size: 1.4rem; color: #fff; margin-bottom: 0.5rem; }
+    .arch-section > p  { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 2.5rem; }
+    .arch-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .arch-layer {
+      width: 100%;
+      max-width: 620px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 0.1rem 0.4rem;
-      font-size: 0.75rem;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      text-align: center;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: default;
+    }
+    .arch-layer:hover { border-color: #7c3aed; box-shadow: 0 0 20px rgba(124,58,237,0.2); }
+    .arch-layer .layer-title { font-size: 0.9rem; font-weight: 600; color: #fff; margin-bottom: 0.3rem; }
+    .arch-layer .layer-desc  { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+    .arch-layer .layer-tags  { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; margin-top: 0.5rem; }
+    .arch-layer .layer-tag {
+      font-size: 0.68rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      background: var(--bg);
+      border: 1px solid var(--border);
       color: var(--green);
     }
-  </style>
+    .arch-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      padding: 0.2rem 0;
+    }
+    .arch-arrow .arrow-line {
+      width: 2px;
+      height: 24px;
+      background: linear-gradient(to bottom, #4c1d95, #7c3aed);
+    }
+    .arch-arrow .arrow-label {
+      font-size: 0.65rem;
+      color: #7c3aed;
+      background: var(--bg);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid #4c1d95;
+      white-space: nowrap;
+    }
+    .arch-arrow .arrow-tip {
+      width: 0; height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 7px solid #7c3aed;
+    }
+    /* layer accent colours */
+    .layer-client  { border-left: 3px solid #60a5fa; }
+    .layer-gateway { border-left: 3px solid #a78bfa; }
+    .layer-engine  { border-left: 3px solid #34d399; }
+    .layer-db      { border-left: 3px solid #f87171; }
+    .layer-qpu     { border-left: 3px solid #facc15; }
+
+    /* ── DB MODEL DIAGRAM ── */
+    .model-section { background: var(--surface); padding: 3.5rem 1.5rem; }
+    .model-inner   { max-width: 1100px; margin: 0 auto; }
+    .model-inner > h2 { text-align: center; font-size: 1.4rem; color: #fff; margin-bottom: 0.5rem; }
+    .model-inner > p  { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 2.5rem; }
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+    .model-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .model-card:hover { border-color: #7c3aed; transform: translateY(-2px); }
+    .model-header {
+      padding: 0.75rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .model-header .model-icon { font-size: 1rem; }
+    .model-body { padding: 0 1rem 0.75rem; }
+    .model-field {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid #1f2937;
+      font-size: 0.75rem;
+    }
+    .model-field:last-child { border-bottom: none; }
+    .field-name { color: var(--text); font-family: monospace; }
+    .field-type { color: var(--muted); font-size: 0.68rem; }
+    .field-pk   { color: #facc15; font-size: 0.65rem; font-weight: 700; }
+    .field-fk   { color: #60a5fa; font-size: 0.65rem; font-weight: 700; }
+    .field-enc  { color: #34d399; font-size: 0.65rem; font-weight: 700; }
+    /* model header colours */
+    .mh-user     { background: #1e3a5f; color: #60a5fa; }
+    .mh-apikey   { background: #1a2e3a; color: #38bdf8; }
+    .mh-joblog   { background: #1a2d1a; color: #4ade80; }
+    .mh-mkey     { background: #2d1a3a; color: #c084fc; }
+    .mh-audit    { background: #1e3a2a; color: #34d399; }
+    .mh-threat   { background: #3a1a1a; color: #f87171; }
+
+    /* ── HEALTH WIDGET ── */
+    .health-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .health-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.3s;
+    }
+    .health-dot.online  { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+    .health-dot.offline { background: #f87171; box-shadow: 0 0 6px #f87171; }
+    .health-ts { color: #374151; font-size: 0.7rem; }
 </head>
 <body>
 
@@ -201,6 +335,13 @@
       <input class="key-input" type="text" placeholder="X-Api-Key…" />
     </div>
   </nav>
+
+  <!-- HEALTH BAR -->
+  <div class="health-bar">
+    <div class="health-dot" id="healthDot"></div>
+    <span id="healthStatus">Checking API status…</span>
+    <span class="health-ts" id="healthTs"></span>
+  </div>
 
   <!-- HERO -->
   <section class="hero">
@@ -289,6 +430,191 @@
     </div>
   </section>
 
+  <!-- ARCHITECTURE DIAGRAM -->
+  <section class="arch-section">
+    <h2>System Architecture</h2>
+    <p>How a request flows from your app through to the quantum circuit and back.</p>
+    <div class="arch-diagram">
+
+      <div class="arch-layer layer-client">
+        <div class="layer-title">🖥️ Client Application Layer</div>
+        <div class="layer-desc">Any website, mobile app, PHP backend, or webhook</div>
+        <div class="layer-tags">
+          <span class="layer-tag">JavaScript</span>
+          <span class="layer-tag">PHP</span>
+          <span class="layer-tag">Mobile</span>
+          <span class="layer-tag">Webhooks</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">
+        <div class="arrow-line"></div>
+        <div class="arrow-label">JSON / HTTP POST + X-Api-Key</div>
+        <div class="arrow-line"></div>
+        <div class="arrow-tip"></div>
+      </div>
+
+      <div class="arch-layer layer-gateway">
+        <div class="layer-title">⚡ FastAPI Gateway Layer</div>
+        <div class="layer-desc">Authentication · Request validation · Rate limiting · Job logging</div>
+        <div class="layer-tags">
+          <span class="layer-tag">API Key Auth</span>
+          <span class="layer-tag">Rate Limit 10/min</span>
+          <span class="layer-tag">Pydantic Validation</span>
+          <span class="layer-tag">MySQL Logging</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">
+        <div class="arrow-line"></div>
+        <div class="arrow-label">Python in-memory</div>
+        <div class="arrow-line"></div>
+        <div class="arrow-tip"></div>
+      </div>
+
+      <div class="arch-layer layer-engine">
+        <div class="layer-title">⚛️ Quantum Translation Engine</div>
+        <div class="layer-desc">Maps input JSON to quantum gate circuits · Threat detection · Key lifecycle</div>
+        <div class="layer-tags">
+          <span class="layer-tag">Hadamard</span>
+          <span class="layer-tag">QAOA</span>
+          <span class="layer-tag">VQE</span>
+          <span class="layer-tag">BB84</span>
+          <span class="layer-tag">AES-256-GCM</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">
+        <div class="arrow-line"></div>
+        <div class="arrow-label">Qiskit Circuit Objects</div>
+        <div class="arrow-line"></div>
+        <div class="arrow-tip"></div>
+      </div>
+
+      <div class="arch-layer layer-qpu">
+        <div class="layer-title">🔬 Quantum Execution Provider</div>
+        <div class="layer-desc">Runs the circuit and returns measurement results</div>
+        <div class="layer-tags">
+          <span class="layer-tag">AerSimulator (default)</span>
+          <span class="layer-tag">IBM Quantum (production)</span>
+          <span class="layer-tag">AWS Braket (production)</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">
+        <div class="arrow-line"></div>
+        <div class="arrow-label">Encrypted write / Decrypted read</div>
+        <div class="arrow-line"></div>
+        <div class="arrow-tip"></div>
+      </div>
+
+      <div class="arch-layer layer-db">
+        <div class="layer-title">🗄️ MySQL Database Layer</div>
+        <div class="layer-desc">Persists users, keys (AES-256-GCM encrypted), audit logs, threat events</div>
+        <div class="layer-tags">
+          <span class="layer-tag">SQLAlchemy 2.0</span>
+          <span class="layer-tag">Encrypted at rest</span>
+          <span class="layer-tag">Soft delete</span>
+          <span class="layer-tag">Retention policy</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- DB MODEL DIAGRAM -->
+  <section class="model-section">
+    <div class="model-inner">
+      <h2>Database Models</h2>
+      <p>Six tables powering the platform — hover any model to highlight it.</p>
+      <div class="model-grid">
+
+        <div class="model-card">
+          <div class="model-header mh-user"><span class="model-icon">👤</span> User</div>
+          <div class="model-body">
+            <div class="model-field"><span class="field-name">id</span><span class="field-pk">PK · UUID</span></div>
+            <div class="model-field"><span class="field-name">email</span><span class="field-type">String(255)</span></div>
+            <div class="model-field"><span class="field-name">created_at</span><span class="field-type">DateTime</span></div>
+            <div class="model-field"><span class="field-name">deleted_at</span><span class="field-type">DateTime · nullable</span></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-header mh-apikey"><span class="model-icon">🔑</span> APIKey</div>
+          <div class="model-body">
+            <div class="model-field"><span class="field-name">id</span><span class="field-pk">PK · UUID</span></div>
+            <div class="model-field"><span class="field-name">key</span><span class="field-type">String(64) · unique</span></div>
+            <div class="model-field"><span class="field-name">user_id</span><span class="field-fk">FK → User</span></div>
+            <div class="model-field"><span class="field-name">created_at</span><span class="field-type">DateTime</span></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-header mh-joblog"><span class="model-icon">📋</span> JobLog</div>
+          <div class="model-body">
+            <div class="model-field"><span class="field-name">id</span><span class="field-pk">PK · UUID</span></div>
+            <div class="model-field"><span class="field-name">user_id</span><span class="field-fk">FK → User</span></div>
+            <div class="model-field"><span class="field-name">endpoint</span><span class="field-type">String(100)</span></div>
+            <div class="model-field"><span class="field-name">input_data</span><span class="field-type">Text</span></div>
+            <div class="model-field"><span class="field-name">result</span><span class="field-type">Text</span></div>
+            <div class="model-field"><span class="field-name">created_at</span><span class="field-type">DateTime</span></div>
+            <div class="model-field"><span class="field-name">retention_days</span><span class="field-type">Int · default 90</span></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-header mh-mkey"><span class="model-icon">🗝️</span> ManagedKey</div>
+          <div class="model-body">
+            <div class="model-field"><span class="field-name">id</span><span class="field-pk">PK · UUID</span></div>
+            <div class="model-field"><span class="field-name">user_id</span><span class="field-fk">FK → User</span></div>
+            <div class="model-field"><span class="field-name">app_id</span><span class="field-type">String(100)</span></div>
+            <div class="model-field"><span class="field-name">key_value</span><span class="field-enc">🔒 AES-256-GCM</span></div>
+            <div class="model-field"><span class="field-name">previous_key</span><span class="field-enc">🔒 AES-256-GCM</span></div>
+            <div class="model-field"><span class="field-name">status</span><span class="field-type">active|rotated|revoked</span></div>
+            <div class="model-field"><span class="field-name">key_bits</span><span class="field-type">String(10)</span></div>
+            <div class="model-field"><span class="field-name">expires_at</span><span class="field-type">DateTime · nullable</span></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-header mh-audit"><span class="model-icon">📜</span> AuditLog</div>
+          <div class="model-body">
+            <div class="model-field"><span class="field-name">id</span><span class="field-pk">PK · UUID</span></div>
+            <div class="model-field"><span class="field-name">user_id</span><span class="field-fk">FK → User</span></div>
+            <div class="model-field"><span class="field-name">app_id</span><span class="field-type">String(100)</span></div>
+            <div class="model-field"><span class="field-name">event_type</span><span class="field-type">String(50)</span></div>
+            <div class="model-field"><span class="field-name">detail</span><span class="field-type">Text</span></div>
+            <div class="model-field"><span class="field-name">ip_address</span><span class="field-type">String(45)</span></div>
+            <div class="model-field"><span class="field-name">created_at</span><span class="field-type">DateTime</span></div>
+            <div class="model-field"><span class="field-name">retention_days</span><span class="field-type">Int · default 365</span></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-header mh-threat"><span class="model-icon">🚨</span> ThreatEvent</div>
+          <div class="model-body">
+            <div class="model-field"><span class="field-name">id</span><span class="field-pk">PK · UUID</span></div>
+            <div class="model-field"><span class="field-name">user_id</span><span class="field-fk">FK → User</span></div>
+            <div class="model-field"><span class="field-name">app_id</span><span class="field-type">String(100)</span></div>
+            <div class="model-field"><span class="field-name">threat_type</span><span class="field-type">String(50)</span></div>
+            <div class="model-field"><span class="field-name">severity</span><span class="field-type">low|medium|high|critical</span></div>
+            <div class="model-field"><span class="field-name">detail</span><span class="field-type">Text</span></div>
+            <div class="model-field"><span class="field-name">resolved</span><span class="field-type">Boolean</span></div>
+            <div class="model-field"><span class="field-name">created_at</span><span class="field-type">DateTime</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Legend -->
+      <div style="display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;font-size:0.75rem;color:var(--muted);">
+        <span><span style="color:#facc15;font-weight:700;">PK</span> — Primary Key</span>
+        <span><span style="color:#60a5fa;font-weight:700;">FK</span> — Foreign Key → User</span>
+        <span><span style="color:#34d399;font-weight:700;">🔒</span> — Encrypted at rest (AES-256-GCM)</span>
+      </div>
+    </div>
+  </section>
+
   <!-- HOW IT WORKS -->
   <section class="how">
     <div class="how-inner">
@@ -340,5 +666,25 @@
   </footer>
 
   <script src="shared.js"></script>
-</body>
+  <script>
+    // Live API health polling
+    async function checkHealth() {
+      const dot = document.getElementById('healthDot');
+      const status = document.getElementById('healthStatus');
+      const ts = document.getElementById('healthTs');
+      try {
+        const res = await fetch('http://127.0.0.1:8000/health');
+        const data = await res.json();
+        dot.className = 'health-dot online';
+        status.textContent = 'API online — ' + (data.timestamp ? new Date(data.timestamp).toLocaleTimeString() : '');
+        ts.textContent = 'Last checked ' + new Date().toLocaleTimeString();
+      } catch {
+        dot.className = 'health-dot offline';
+        status.textContent = 'API offline — start the server with: uvicorn app.main:app --reload';
+        ts.textContent = 'Last checked ' + new Date().toLocaleTimeString();
+      }
+    }
+    checkHealth();
+    setInterval(checkHealth, 10000);
+  </script>
 </html>
