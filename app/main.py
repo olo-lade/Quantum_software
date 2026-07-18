@@ -5,13 +5,14 @@
 import os
 import json
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Header, HTTPException, Depends, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from dotenv import load_dotenv
 
 from app.database import engine, get_db, Base
@@ -136,6 +137,9 @@ class ThreatQueryRequest(BaseModel):
     app_id: str | None = None
     unresolved_only: bool = True
 
+class PurgeLogsRequest(BaseModel):
+    older_than_days: int = Field(default=90, ge=1, le=3650, description="Purge logs older than this many days.")
+
 
 # ---------------------------------------------------------------------------
 # User & API Key management
@@ -146,7 +150,10 @@ class UserCreate(BaseModel):
 
 @app.post("/users", tags=["Admin"], summary="Register a new user and receive an API key.")
 def create_user(payload: UserCreate, db: Session = Depends(get_db)):
-    if db.query(models.User).filter(models.User.email == payload.email).first():
+    if db.query(models.User).filter(
+        models.User.email == payload.email,
+        models.User.deleted_at == None
+    ).first():
         raise HTTPException(status_code=409, detail="Email already registered.")
     user = models.User(email=payload.email)
     db.add(user)
@@ -155,6 +162,75 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)):
     db.add(api_key)
     db.commit()
     return {"user_id": user.id, "api_key": api_key.key}
+
+
+@app.delete("/users/{user_id}", tags=["Admin"], summary="GDPR: Delete a user account and anonymise all personal data.")
+def delete_user(user_id: str, auth: models.APIKey = Depends(authenticate), db: Session = Depends(get_db)):
+    if auth.user_id != user_id:
+        raise HTTPException(status_code=403, detail="You can only delete your own account.")
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user or user.deleted_at:
+        raise HTTPException(status_code=404, detail="User not found.")
+    # Anonymise PII — replace email, keep record for audit integrity
+    user.email = f"deleted_{user_id}@anonymised"
+    user.deleted_at = datetime.utcnow()
+    # Revoke all API keys
+    db.query(models.APIKey).filter(models.APIKey.user_id == user_id).delete()
+    # Revoke all managed keys
+    db.query(models.ManagedKey).filter(
+        models.ManagedKey.user_id == user_id,
+        models.ManagedKey.status == "active"
+    ).update({"status": "revoked"})
+    db.commit()
+    return {"deleted": True, "user_id": user_id, "anonymised_at": user.deleted_at.isoformat()}
+
+
+@app.get("/users/{user_id}/export", tags=["Admin"], summary="GDPR: Export all data held for a user account.")
+def export_user(user_id: str, auth: models.APIKey = Depends(authenticate), db: Session = Depends(get_db)):
+    if auth.user_id != user_id:
+        raise HTTPException(status_code=403, detail="You can only export your own data.")
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    audit_logs = db.query(models.AuditLog).filter(models.AuditLog.user_id == user_id).all()
+    job_logs = db.query(models.JobLog).filter(models.JobLog.user_id == user_id).all()
+    managed_keys = db.query(models.ManagedKey).filter(models.ManagedKey.user_id == user_id).all()
+    threat_events = db.query(models.ThreatEvent).filter(models.ThreatEvent.user_id == user_id).all()
+    return {
+        "user": {"id": user.id, "email": user.email, "created_at": user.created_at.isoformat()},
+        "managed_keys": [{"id": k.id, "app_id": k.app_id, "status": k.status,
+                          "key_bits": k.key_bits, "created_at": k.created_at.isoformat(),
+                          "expires_at": k.expires_at.isoformat() if k.expires_at else None}
+                         for k in managed_keys],
+        "audit_logs": [{"id": l.id, "app_id": l.app_id, "event_type": l.event_type,
+                        "detail": l.detail, "created_at": l.created_at.isoformat()}
+                       for l in audit_logs],
+        "job_logs": [{"id": l.id, "endpoint": l.endpoint,
+                      "created_at": l.created_at.isoformat()} for l in job_logs],
+        "threat_events": [{"id": e.id, "app_id": e.app_id, "threat_type": e.threat_type,
+                           "severity": e.severity, "resolved": e.resolved,
+                           "created_at": e.created_at.isoformat()} for e in threat_events],
+        "exported_at": datetime.utcnow().isoformat(),
+    }
+
+
+@app.delete("/admin/purge-logs", tags=["Admin"], summary="Purge job and audit logs older than N days (retention policy).")
+def purge_logs(payload: PurgeLogsRequest, auth: models.APIKey = Depends(authenticate), db: Session = Depends(get_db)):
+    cutoff = datetime.utcnow() - timedelta(days=payload.older_than_days)
+    deleted_jobs = db.query(models.JobLog).filter(
+        models.JobLog.user_id == auth.user_id,
+        models.JobLog.created_at < cutoff
+    ).delete()
+    deleted_audit = db.query(models.AuditLog).filter(
+        models.AuditLog.user_id == auth.user_id,
+        models.AuditLog.created_at < cutoff
+    ).delete()
+    db.commit()
+    return {
+        "purged_job_logs": deleted_jobs,
+        "purged_audit_logs": deleted_audit,
+        "cutoff_date": cutoff.isoformat(),
+    }
 
 
 # ---------------------------------------------------------------------------

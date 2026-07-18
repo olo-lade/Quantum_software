@@ -7,6 +7,7 @@ from collections import defaultdict
 from sqlalchemy.orm import Session
 from app import models
 from app.quantum_logic.cryptography import generate_quantum_key
+from app.encryption import encrypt_value, decrypt_value
 
 # In-memory store for replay and brute-force detection
 _auth_fail_store: dict[str, list[datetime]] = defaultdict(list)
@@ -19,10 +20,11 @@ BRUTE_FORCE_WINDOW = 60     # seconds
 def issue_key(db: Session, user_id: str, app_id: str, key_bits: int = 256,
               ttl_hours: int | None = None) -> models.ManagedKey:
     expires_at = datetime.utcnow() + timedelta(hours=ttl_hours) if ttl_hours else None
+    raw_key = generate_quantum_key(key_bits)
     record = models.ManagedKey(
         user_id=user_id,
         app_id=app_id,
-        key_value=generate_quantum_key(key_bits),
+        key_value=encrypt_value(raw_key),       # encrypted at rest
         key_bits=str(key_bits),
         status="active",
         expires_at=expires_at,
@@ -31,6 +33,8 @@ def issue_key(db: Session, user_id: str, app_id: str, key_bits: int = 256,
     db.commit()
     db.refresh(record)
     _write_audit(db, user_id, app_id, "key_issued", f"key_id={record.id} bits={key_bits}")
+    # Return record with decrypted key_value so the caller receives the plaintext key
+    record.key_value = raw_key
     return record
 
 
@@ -44,12 +48,14 @@ def rotate_key(db: Session, key_id: str, user_id: str) -> models.ManagedKey:
     if record.status == "revoked":
         raise ValueError("Cannot rotate a revoked key.")
 
-    record.previous_key = record.key_value
-    record.key_value = generate_quantum_key(int(record.key_bits))
+    new_raw_key = generate_quantum_key(int(record.key_bits))
+    record.previous_key = record.key_value          # store old encrypted value
+    record.key_value = encrypt_value(new_raw_key)   # encrypt new value at rest
     record.status = "active"
     db.commit()
     db.refresh(record)
     _write_audit(db, user_id, record.app_id, "key_rotated", f"key_id={key_id}")
+    record.key_value = new_raw_key                  # return plaintext to caller
     return record
 
 
@@ -92,7 +98,7 @@ def verify_managed_key(db: Session, key_id: str, key_value: str,
         return {"valid": False, "reason": "key_expired"}
 
     # Value mismatch → brute force tracking
-    if record.key_value != key_value:
+    if decrypt_value(record.key_value) != key_value:
         _track_auth_failure(db, record.user_id, record.app_id, key_id, ip_address)
         return {"valid": False, "reason": "invalid_key"}
 

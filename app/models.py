@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, DateTime, Text, ForeignKey, Boolean
+from sqlalchemy import String, DateTime, Text, ForeignKey, Boolean, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
@@ -11,6 +11,8 @@ class User(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    # GDPR: soft delete — email anonymised on deletion, record kept for audit integrity
+    deleted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True, default=None)
 
     api_keys: Mapped[list["APIKey"]] = relationship(back_populates="user")
     logs: Mapped[list["JobLog"]] = relationship(back_populates="user")
@@ -39,6 +41,8 @@ class JobLog(Base):
     input_data: Mapped[str] = mapped_column(Text, nullable=False)
     result: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    # Retention: records older than retention_days are eligible for purge
+    retention_days: Mapped[int] = mapped_column(Integer, default=90)
 
     user: Mapped["User"] = relationship(back_populates="logs")
 
@@ -72,6 +76,8 @@ class AuditLog(Base):
     detail: Mapped[str] = mapped_column(Text, nullable=True)
     ip_address: Mapped[str] = mapped_column(String(45), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    # Retention: default 365 days for audit logs (SOC 2 / ISO 27001 requirement)
+    retention_days: Mapped[int] = mapped_column(Integer, default=365)
 
     user: Mapped["User"] = relationship(back_populates="audit_logs")
 
