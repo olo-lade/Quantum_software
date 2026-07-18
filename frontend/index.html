@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quantum API Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0d0d1a; color: #e0e0ff; min-height: 100vh; padding: 2rem; }
+    h1 { text-align: center; color: #a78bfa; margin-bottom: 0.25rem; font-size: 1.8rem; }
+    p.subtitle { text-align: center; color: #6b7280; margin-bottom: 2rem; font-size: 0.9rem; }
+    .api-bar { display: flex; gap: 0.5rem; margin-bottom: 2rem; }
+    .api-bar input { flex: 1; padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid #374151; background: #1a1a2e; color: #e0e0ff; font-size: 0.9rem; }
+    .api-bar input::placeholder { color: #6b7280; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .card { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 12px; padding: 1.25rem; }
+    .card h2 { font-size: 1rem; color: #a78bfa; margin-bottom: 1rem; }
+    label { display: block; font-size: 0.8rem; color: #9ca3af; margin-bottom: 0.25rem; margin-top: 0.75rem; }
+    input[type="number"], input[type="text"], textarea { width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #374151; background: #0d0d1a; color: #e0e0ff; font-size: 0.85rem; }
+    textarea { resize: vertical; font-family: monospace; }
+    button { margin-top: 1rem; width: 100%; padding: 0.6rem; border-radius: 8px; border: none; background: #7c3aed; color: white; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #6d28d9; }
+    button:disabled { background: #374151; cursor: not-allowed; }
+    .result { margin-top: 1rem; background: #0d0d1a; border-radius: 6px; padding: 0.75rem; font-family: monospace; font-size: 0.78rem; color: #6ee7b7; white-space: pre-wrap; word-break: break-all; min-height: 60px; border: 1px solid #1f2937; }
+    .error { color: #f87171; }
+    .tag { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 999px; margin-bottom: 0.5rem; }
+    .tag-crypto { background: #1e3a5f; color: #60a5fa; }
+    .tag-logistics { background: #1a3a2a; color: #34d399; }
+    .tag-finance { background: #3a1a1a; color: #f87171; }
+  </style>
+</head>
+<body>
+  <h1>🌌 Quantum API Dashboard</h1>
+  <p class="subtitle">Quantum-as-a-Service — powered by Qiskit + FastAPI</p>
+
+  <div class="api-bar">
+    <input id="apiKey" type="text" placeholder="Paste your X-Api-Key here..." />
+  </div>
+
+  <div class="grid">
+
+    <!-- Crypto -->
+    <div class="card">
+      <span class="tag tag-crypto">🔐 Cryptography</span>
+      <h2>POST /quantum/crypto/keygen</h2>
+      <label>Number of Bits (8–512)</label>
+      <input id="numBits" type="number" value="256" min="8" max="512" step="8" />
+      <button onclick="keygen(event)">Generate Key</button>
+      <div class="result" id="keygenResult">—</div>
+    </div>
+
+    <!-- Logistics -->
+    <div class="card">
+      <span class="tag tag-logistics">🚚 Logistics</span>
+      <h2>POST /quantum/logistics/optimize</h2>
+      <label>Distance Matrix (JSON array of arrays)</label>
+      <textarea id="distances" rows="5">[[0,10,15,20],[10,0,35,25],[15,35,0,30],[20,25,30,0]]</textarea>
+      <button onclick="optimize(event)">Optimize Route</button>
+      <div class="result" id="logisticsResult">—</div>
+    </div>
+
+    <!-- Finance -->
+    <div class="card">
+      <span class="tag tag-finance">📈 Finance</span>
+      <h2>POST /quantum/finance/portfolio</h2>
+      <label>Returns (JSON array)</label>
+      <input id="returns" type="text" value="[0.12, 0.08, 0.15, 0.05]" />
+      <label>Risk Matrix (JSON array of arrays)</label>
+      <textarea id="riskMatrix" rows="4">[[0.1,0.02,0.04,0.01],[0.02,0.08,0.03,0.02],[0.04,0.03,0.12,0.01],[0.01,0.02,0.01,0.05]]</textarea>
+      <label>Risk Tolerance (0.0 – 1.0)</label>
+      <input id="riskTolerance" type="number" value="0.5" min="0" max="1" step="0.1" />
+      <button onclick="portfolio(event)">Optimize Portfolio</button>
+      <div class="result" id="financeResult">—</div>
+    </div>
+
+  </div>
+
+  <script>
+    const BASE = 'http://127.0.0.1:8000';
+
+    function getKey() {
+      const k = document.getElementById('apiKey').value.trim();
+      if (!k) { alert('Paste your X-Api-Key first.'); return null; }
+      return k;
+    }
+
+    function show(id, data, isError = false) {
+      const el = document.getElementById(id);
+      el.textContent = JSON.stringify(data, null, 2);
+      el.className = 'result' + (isError ? ' error' : '');
+    }
+
+    async function call(endpoint, body, resultId, btn) {
+      const key = getKey(); if (!key) return;
+      btn.disabled = true;
+      try {
+        const res = await fetch(BASE + endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Api-Key': key },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        show(resultId, data, !res.ok);
+      } catch (e) {
+        show(resultId, { error: e.message }, true);
+      } finally { btn.disabled = false; }
+    }
+
+    function keygen(e) {
+      call('/quantum/crypto/keygen', { num_bits: parseInt(document.getElementById('numBits').value) }, 'keygenResult', e.target);
+    }
+
+    function optimize(e) {
+      try {
+        call('/quantum/logistics/optimize', { distances: JSON.parse(document.getElementById('distances').value) }, 'logisticsResult', e.target);
+      } catch { show('logisticsResult', { error: 'Invalid JSON in distance matrix.' }, true); }
+    }
+
+    function portfolio(e) {
+      try {
+        call('/quantum/finance/portfolio', {
+          returns: JSON.parse(document.getElementById('returns').value),
+          risk_matrix: JSON.parse(document.getElementById('riskMatrix').value),
+          risk_tolerance: parseFloat(document.getElementById('riskTolerance').value)
+        }, 'financeResult', e.target);
+      } catch { show('financeResult', { error: 'Invalid JSON input.' }, true); }
+    }
+  </script>
+</body>
+</html>
