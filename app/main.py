@@ -300,6 +300,29 @@ def health():
     return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
 
 
+@app.get("/schema", tags=["System"], summary="Live database model schema for the frontend diagram.")
+def schema():
+    """Returns all table names and their columns — no auth required."""
+    result = []
+    for table in Base.metadata.sorted_tables:
+        cols = []
+        for col in table.columns:
+            tags = []
+            if col.primary_key:
+                tags.append("PK")
+            for fk in col.foreign_keys:
+                tags.append(f"FK→{fk.column.table.name}")
+            if col.nullable:
+                tags.append("nullable")
+            cols.append({
+                "name": col.name,
+                "type": str(col.type),
+                "tags": tags,
+            })
+        result.append({"table": table.name, "columns": cols})
+    return result
+
+
 # ---------------------------------------------------------------------------
 # Key Management endpoints
 # ---------------------------------------------------------------------------

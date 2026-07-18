@@ -522,95 +522,17 @@
     </div>
   </section>
 
-  <!-- DB MODEL DIAGRAM -->
+  <!-- DB MODEL DIAGRAM (live) -->
   <section class="model-section">
     <div class="model-inner">
       <h2>Database Models</h2>
-      <p>Six tables powering the platform — hover any model to highlight it.</p>
-      <div class="model-grid">
-
-        <div class="model-card">
-          <div class="model-header mh-user"><span class="model-icon">👤</span> User</div>
-          <div class="model-body">
-            <div class="model-field"><span class="field-name">id</span><span class="field-pk">PK · UUID</span></div>
-            <div class="model-field"><span class="field-name">email</span><span class="field-type">String(255)</span></div>
-            <div class="model-field"><span class="field-name">created_at</span><span class="field-type">DateTime</span></div>
-            <div class="model-field"><span class="field-name">deleted_at</span><span class="field-type">DateTime · nullable</span></div>
-          </div>
-        </div>
-
-        <div class="model-card">
-          <div class="model-header mh-apikey"><span class="model-icon">🔑</span> APIKey</div>
-          <div class="model-body">
-            <div class="model-field"><span class="field-name">id</span><span class="field-pk">PK · UUID</span></div>
-            <div class="model-field"><span class="field-name">key</span><span class="field-type">String(64) · unique</span></div>
-            <div class="model-field"><span class="field-name">user_id</span><span class="field-fk">FK → User</span></div>
-            <div class="model-field"><span class="field-name">created_at</span><span class="field-type">DateTime</span></div>
-          </div>
-        </div>
-
-        <div class="model-card">
-          <div class="model-header mh-joblog"><span class="model-icon">📋</span> JobLog</div>
-          <div class="model-body">
-            <div class="model-field"><span class="field-name">id</span><span class="field-pk">PK · UUID</span></div>
-            <div class="model-field"><span class="field-name">user_id</span><span class="field-fk">FK → User</span></div>
-            <div class="model-field"><span class="field-name">endpoint</span><span class="field-type">String(100)</span></div>
-            <div class="model-field"><span class="field-name">input_data</span><span class="field-type">Text</span></div>
-            <div class="model-field"><span class="field-name">result</span><span class="field-type">Text</span></div>
-            <div class="model-field"><span class="field-name">created_at</span><span class="field-type">DateTime</span></div>
-            <div class="model-field"><span class="field-name">retention_days</span><span class="field-type">Int · default 90</span></div>
-          </div>
-        </div>
-
-        <div class="model-card">
-          <div class="model-header mh-mkey"><span class="model-icon">🗝️</span> ManagedKey</div>
-          <div class="model-body">
-            <div class="model-field"><span class="field-name">id</span><span class="field-pk">PK · UUID</span></div>
-            <div class="model-field"><span class="field-name">user_id</span><span class="field-fk">FK → User</span></div>
-            <div class="model-field"><span class="field-name">app_id</span><span class="field-type">String(100)</span></div>
-            <div class="model-field"><span class="field-name">key_value</span><span class="field-enc">🔒 AES-256-GCM</span></div>
-            <div class="model-field"><span class="field-name">previous_key</span><span class="field-enc">🔒 AES-256-GCM</span></div>
-            <div class="model-field"><span class="field-name">status</span><span class="field-type">active|rotated|revoked</span></div>
-            <div class="model-field"><span class="field-name">key_bits</span><span class="field-type">String(10)</span></div>
-            <div class="model-field"><span class="field-name">expires_at</span><span class="field-type">DateTime · nullable</span></div>
-          </div>
-        </div>
-
-        <div class="model-card">
-          <div class="model-header mh-audit"><span class="model-icon">📜</span> AuditLog</div>
-          <div class="model-body">
-            <div class="model-field"><span class="field-name">id</span><span class="field-pk">PK · UUID</span></div>
-            <div class="model-field"><span class="field-name">user_id</span><span class="field-fk">FK → User</span></div>
-            <div class="model-field"><span class="field-name">app_id</span><span class="field-type">String(100)</span></div>
-            <div class="model-field"><span class="field-name">event_type</span><span class="field-type">String(50)</span></div>
-            <div class="model-field"><span class="field-name">detail</span><span class="field-type">Text</span></div>
-            <div class="model-field"><span class="field-name">ip_address</span><span class="field-type">String(45)</span></div>
-            <div class="model-field"><span class="field-name">created_at</span><span class="field-type">DateTime</span></div>
-            <div class="model-field"><span class="field-name">retention_days</span><span class="field-type">Int · default 365</span></div>
-          </div>
-        </div>
-
-        <div class="model-card">
-          <div class="model-header mh-threat"><span class="model-icon">🚨</span> ThreatEvent</div>
-          <div class="model-body">
-            <div class="model-field"><span class="field-name">id</span><span class="field-pk">PK · UUID</span></div>
-            <div class="model-field"><span class="field-name">user_id</span><span class="field-fk">FK → User</span></div>
-            <div class="model-field"><span class="field-name">app_id</span><span class="field-type">String(100)</span></div>
-            <div class="model-field"><span class="field-name">threat_type</span><span class="field-type">String(50)</span></div>
-            <div class="model-field"><span class="field-name">severity</span><span class="field-type">low|medium|high|critical</span></div>
-            <div class="model-field"><span class="field-name">detail</span><span class="field-type">Text</span></div>
-            <div class="model-field"><span class="field-name">resolved</span><span class="field-type">Boolean</span></div>
-            <div class="model-field"><span class="field-name">created_at</span><span class="field-type">DateTime</span></div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Legend -->
+      <p>Live from <code style="color:var(--green);font-size:0.82rem">/schema</code> — updates automatically when the API is running.</p>
+      <div class="model-grid" id="modelGrid"><p style="color:var(--muted);text-align:center;grid-column:1/-1">Waiting for API…</p></div>
       <div style="display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;font-size:0.75rem;color:var(--muted);">
         <span><span style="color:#facc15;font-weight:700;">PK</span> — Primary Key</span>
-        <span><span style="color:#60a5fa;font-weight:700;">FK</span> — Foreign Key → User</span>
-        <span><span style="color:#34d399;font-weight:700;">🔒</span> — Encrypted at rest (AES-256-GCM)</span>
+        <span><span style="color:#60a5fa;font-weight:700;">FK</span> — Foreign Key</span>
+        <span><span style="color:#34d399;font-weight:700;">🔒</span> — Encrypted at rest</span>
+        <span><span style="color:var(--muted);">nullable</span> — Optional field</span>
       </div>
     </div>
   </section>
@@ -667,6 +589,60 @@
 
   <script src="shared.js"></script>
   <script>
+    // ── ENCRYPTED FIELDS (known from encryption.py) ──────────────────────
+    const ENCRYPTED_FIELDS = new Set(['key_value', 'previous_key']);
+
+    // ── TABLE DISPLAY CONFIG ─────────────────────────────────────────────
+    const TABLE_META = {
+      users:        { icon: '👤', cls: 'mh-user',   label: 'User' },
+      api_keys:     { icon: '🔑', cls: 'mh-apikey', label: 'APIKey' },
+      job_logs:     { icon: '📋', cls: 'mh-joblog', label: 'JobLog' },
+      managed_keys: { icon: '🗝️', cls: 'mh-mkey',   label: 'ManagedKey' },
+      audit_logs:   { icon: '📜', cls: 'mh-audit',  label: 'AuditLog' },
+      threat_events:{ icon: '🚨', cls: 'mh-threat', label: 'ThreatEvent' },
+    };
+
+    function renderSchema(tables) {
+      const grid = document.getElementById('modelGrid');
+      grid.innerHTML = tables.map(({ table, columns }) => {
+        const meta = TABLE_META[table] || { icon: '🗄️', cls: 'mh-user', label: table };
+        const fields = columns.map(col => {
+          let badge = '';
+          if (ENCRYPTED_FIELDS.has(col.name)) {
+            badge = `<span class="field-enc">🔒 AES-256-GCM</span>`;
+          } else if (col.tags.includes('PK')) {
+            badge = `<span class="field-pk">PK · ${col.type}</span>`;
+          } else {
+            const fk = col.tags.find(t => t.startsWith('FK'));
+            if (fk) {
+              badge = `<span class="field-fk">${fk.replace('FK→', 'FK → ')}</span>`;
+            } else {
+              const nullable = col.tags.includes('nullable') ? ' · nullable' : '';
+              badge = `<span class="field-type">${col.type}${nullable}</span>`;
+            }
+          }
+          return `<div class="model-field"><span class="field-name">${col.name}</span>${badge}</div>`;
+        }).join('');
+        return `
+          <div class="model-card">
+            <div class="model-header ${meta.cls}"><span class="model-icon">${meta.icon}</span> ${meta.label}</div>
+            <div class="model-body">${fields}</div>
+          </div>`;
+      }).join('');
+    }
+
+    async function loadSchema() {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/schema');
+        if (!res.ok) throw new Error();
+        renderSchema(await res.json());
+      } catch {
+        // API offline — leave existing content, health bar already shows status
+      }
+    }
+    loadSchema();
+    setInterval(loadSchema, 30000);
+
     // Live API health polling
     async function checkHealth() {
       const dot = document.getElementById('healthDot');
