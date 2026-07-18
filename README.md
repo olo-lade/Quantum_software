@@ -1,6 +1,6 @@
 # 🌌 Quantum Software (QaaS Layer)
 
-> **Original Author:** Joshua Tosin Pamilerin (GitHub: [olo-lade](https://github.com/olo-lade))
+> **Original Author:** Oluwatosin Olalere (GitHub: [olo-lade](https://github.com/olo-lade))
 > **Repository:** https://github.com/olo-lade/Quantum_software
 > **License:** [CC BY 4.0](LICENSE) — You must credit the original author in any use, fork, or derivative work.
 

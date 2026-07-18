@@ -1,4 +1,4 @@
-# Contributing to Quantum Software (QaaS) by Joshua Tosin Pamilerin
+# Contributing to Quantum Software (QaaS) by Oluwatosin Olalere
 
 Thank you for your interest in contributing! This document outlines the process for reporting bugs, suggesting features, and submitting code changes.
 
@@ -78,7 +78,7 @@ cp .env.example .env
 5. Push and open a Pull Request against `main` on https://github.com/olo-lade/Quantum_software.
 
 > ⚠️ **Attribution Required:** All contributions and derivative works must credit the original author:
-> **Joshua Tosin Pamilerin** — https://github.com/olo-lade/Quantum_software
+> **Oluwatosin Olalere** — https://github.com/olo-lade/Quantum_software
 
 ---
 
