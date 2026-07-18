@@ -1,5 +1,16 @@
-# Environment
+# Environment & secrets — NEVER commit these
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.cert
+*.crt
+secrets/
+
+# Virtual environments
 .venv
 venv/
 env/
@@ -30,3 +41,10 @@ Thumbs.db
 # Distribution
 *.whl
 *.tar.gz
+
+# Infrastructure — belongs in Quantum_software_infrastructure (private repo)
+docker-compose.prod.yml
+nginx/
+terraform/
+infra/
+.github/workflows/deploy*.yml

@@ -15,6 +15,33 @@ An open-source, plug-and-play **Quantum-as-a-Service (QaaS)** abstraction API. A
 
 ---
 
+## 🔒 Repository Security Boundary
+
+This project is split across two repositories by design:
+
+| Repository | Visibility | Contains |
+|---|---|---|
+| `Quantum_software` | 🟢 Public | Application code, algorithms, frontend, documentation |
+| `Quantum_software_infrastructure` | 🔴 Private | Production `.env`, Docker, Nginx, CI/CD, Terraform, SSL certs |
+
+**What is safe to be public (this repo):**
+- All Python source code — reads secrets from environment variables, never hardcodes them
+- `.env.example` — template only, no real values
+- Frontend HTML/CSS/JS — connects to `localhost` by default
+- `requirements.txt`, `README.md`, `LICENSE`
+
+**What must stay private (`Quantum_software_infrastructure`):**
+- `.env` with real `DB_ENCRYPTION_KEY`, `DATABASE_URL`, `IBM_QUANTUM_TOKEN`
+- Docker Compose production configs
+- Nginx / reverse proxy configs with domain names
+- CI/CD deployment pipelines
+- SSL/TLS certificates and private keys
+- Cloud infrastructure code (Terraform, AWS CDK)
+
+**The `.gitignore` in this repo explicitly blocks** `.env`, `*.pem`, `*.key`, `secrets/`, and infrastructure folders from ever being committed here accidentally.
+
+---
+
 ## 🎯 Target Sectors & Use Cases
 
 | Sector | Endpoint | Algorithm |
@@ -139,11 +166,22 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
+Edit `.env` with your credentials. This file is **gitignored and must never be committed** — real production values belong in the private `Quantum_software_infrastructure` repository.
+
 ```env
 DATABASE_URL=mysql+pymysql://root:yourpassword@localhost:3306/quantum_api
 QUANTUM_BACKEND=simulator
 IBM_QUANTUM_TOKEN=your_optional_ibm_token_here
+DB_ENCRYPTION_KEY=your_64_char_hex_string_here
 ```
+
+Generate your `DB_ENCRYPTION_KEY`:
+
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+> ⚠️ **Security boundary:** This repository contains only application code. All production credentials, infrastructure configs, deployment pipelines, SSL certificates, and environment files live exclusively in the private `Quantum_software_infrastructure` repo.
 
 ### 4. Create Database & Run
 
